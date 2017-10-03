@@ -2,6 +2,21 @@
 
 > 用来记录前后端代码风格、开发环境配置、服务器脚本等
 
+<!-- TOC -->
+
+- [技术栈](#技术栈)
+- [加速开发](#加速开发)
+    - [brew 换源](#brew-换源)
+    - [pip 换源](#pip-换源)
+    - [npm 换源](#npm-换源)
+- [开发环境](#开发环境)
+    - [后端环境](#后端环境)
+        - [Python3](#python3)
+        - [virtualenvwrapper](#virtualenvwrapper)
+        - [格式化代码](#格式化代码)
+
+<!-- /TOC -->
+
 ## 技术栈
 
 后端：[Python3](https://www.python.org/download/releases/3.0/) + [flask](http://flask.pocoo.org/) + [mysql](https://www.mysql.com/)
@@ -18,8 +33,8 @@
 
 使用中科大源（或者清华源，不过最近经常抽风，并且修复速度慢，先不推荐）
 
-* [替换 homebrew 默认源](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)
-* [替换 homebrew bottles 默认源](https://lug.ustc.edu.cn/wiki/mirrors/help/homebrew-bottles)
+- [替换 homebrew 默认源](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)
+- [替换 homebrew bottles 默认源](https://lug.ustc.edu.cn/wiki/mirrors/help/homebrew-bottles)
 
 ### pip 换源
 
@@ -87,3 +102,35 @@ workon seattle
 deactivate # 退出虚拟环境
 cdvirtualenv # 进入虚拟环境文件夹
 ```
+
+#### 格式化代码
+
+使用 [yapf](https://github.com/google/yapf)、[isort](https://github.com/timothycrosley/isort) 和 [flake8](http://flake8.pycqa.org/en/latest/) 来检查、格式化代码
+
+##### 安装
+
+```bash
+pip3 install yapf isort flake8
+
+curl https://raw.githubusercontent.com/coscidata/about_code/master/python/.isort.cfg > ~/.isrot.cfg
+```
+
+##### 使用
+
+```bash
+yapf -ir . -e migrations
+isort -rc --atomic .
+```
+
+##### 编辑器配置
+
+###### vim
+
+```config
+Plug 'fisadev/vim-isort'
+autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr>
+```
+
+###### vscode
+
+参考[文章](https://github.com/DonJayamanne/pythonVSCode/wiki)配置并使用 flake8 和 yapf
