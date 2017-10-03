@@ -21,7 +21,7 @@
 
 后端：[Python3](https://www.python.org/download/releases/3.0/) + [flask](http://flask.pocoo.org/) + [mysql](https://www.mysql.com/)
 
-前端：[React](https://reactjs.org/) + [And Design](https://ant.design/index-cn)
+前端：[React](https://reactjs.org/) + [Ant Design](https://ant.design/index-cn)
 
 服务器：[Centos 7](https://www.centos.org/)
 
