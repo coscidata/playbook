@@ -14,6 +14,9 @@
         - [Python3](#python3)
         - [virtualenvwrapper](#virtualenvwrapper)
         - [格式化代码](#格式化代码)
+- [最佳实践](#最佳实践)
+    - [React 实践](#react-实践)
+        - [Container and Presentational Components](#container-and-presentational-components)
 
 <!-- /TOC -->
 
@@ -134,3 +137,41 @@ autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr>
 ###### vscode
 
 参考[文章](https://github.com/DonJayamanne/pythonVSCode/wiki)配置并使用 flake8 和 yapf
+
+## 最佳实践
+
+### React 实践
+
+#### Container and Presentational Components
+
+在 React 开发中，我们推荐将一个功能拆分为一个 Container 组件和作为其子组件的多个 Presentational 组件。
+
+Container 主要负责获取数据、以及和服务端的交互，然后通过 props 将特定的数据传递给对应的 Presentational 子组件。
+
+这样的好处是能够保证 Presentational 组件拥有良好的复用性，以及它的数据结构是清晰地，大部分的 Presentational 组件都可以写成纯函数的形式：
+
+```
+// 没错，每个介绍的文章都要以 CommentList 举例
+const CommentList = props => {
+  const { comments, handleDelete } = props;
+  return (
+    <ul> 
+      {comments.map(<Comment onDelete={handleDelete} />)} 
+    </ul>
+  );
+};
+```
+
+每个 Presentational 组件都会通过 props 中的数据和事件回调与其父级的 Container 组件通信。
+
+使用纯函数编写的组件是无法使用 State 的，但并不等于所有 Presentational 组件都不允许使用 State。我们只是不推荐在 Presentational 组件中直接获取数据，但是依旧可以使用 State 去维持一些样式上的状态，例如 Loading 状态或是切换不同的样式。
+
+我们并不强制要求一个功能只能有一个 Container 组件和多个 Presentational 组件，试想一下如果一个功能所使用的组件数量很多、层级很深，所有事件回调和数据获取都放在最外层的 Container 组件下的话，反而会使代码变得更加混乱，不过我们暂时也没遇到这种复杂的场景。
+
+参考资料：
+
+- [Container Components](https://medium.com/@learnreact/container-components-c0e67432e005)
+- [Presentational and Container Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)
+
+
+
