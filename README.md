@@ -17,7 +17,9 @@
 - [最佳实践](#最佳实践)
     - [React 实践](#react-实践)
         - [Container and Presentational Components](#container-and-presentational-components)
-
+    - [Flask 实践](#flask-实践)
+        - [Model 定义](#model-定义)
+        - [API 定义](#api-定义)
 <!-- /TOC -->
 
 ## 技术栈
@@ -172,6 +174,72 @@ const CommentList = props => {
 
 - [Container Components](https://medium.com/@learnreact/container-components-c0e67432e005)
 - [Presentational and Container Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)
+
+### Flask 实践
+
+#### Model 定义
+
+我们使用 Flask-SQLAlchemy，并在其基础的 ORM 上添加一些更友善的约定，使开发变得更加安全和高效。
+
+在 Model 层，我们会在 `db.Model` 之上抽象出一个 `BaseModelMixin`，定义一些基础的字段和方法。
+
+基础字段有：
+
+- `status`：主要用于逻辑删除，逻辑删除相对于物理删除的好处不必多说
+- `created_at`：每行记录的创建时间
+- `updated_at`：每行记录的更新时间
+
+创建时间和更新时间的默认值都放在了数据库层面，原因是我们不希望一些应用外的脚本、手动操作对数据库的更改没有触发这些字段的设置，导致排查时的误判。
+
+基础方法主要就是一个 Model 最基础的增删改查功能。
+
+对于创建和修改，我们更倾向于使用声明式的字段权限控制以替代在 API 里写重复度非常高的校验代码，例如：
+
+```
+class User(BaseModelMixin):
+    __tablename__ = 'user'
+
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(
+        db.String(255),
+        nullable=False,
+        info=dict(creatable=True))
+    password = db.Column(
+        db.String(255),
+        nullable=False,
+        info=dict(creatable=True, editable=True))
+    nickname = db.Column(
+        db.String(255),
+        nullable=False,
+        info=dict(creatable=True, editable=True))
+```
+
+在 User 中，其 `user_id` 是通过自增生成的，不允许手动设置，`username` 可以在创建时设置，但不允许修改，而 `password` 和 `nickname` 则是既可在创建时设置，也可以在修改时设置。
+
+这样对于最基础的 Create 和 Update 方法中，我们可以放心的将整个 Request 映射到 Model 中，不用一个个字段进行赋值，也不需要担心接口被传入一些重要字段。
+
+而对于查询和删除，我们将删除方法实现是修改 `status` 为 `DELETED`，又在 `query` 中默认添加了 `filter(self.status != Status.DELETED.value)`，对使用者隐藏了逻辑删除的实现。
+
+另外，所有查询的方法都需要将实现写在 Model 里，不希望 API 去自行拼接查询方法。并且如果有复用的复杂查询，推荐通过 `@hybrid_property` 或是 `@hybrid_method` 封装起来。
+
+#### API 定义
+
+我们的 API 尽量贴近 RESTful 定义，但是不强求。一个基础的例子：
+
+- 创建用户：`POST /users/`
+- 修改用户信息：`PUT /users/1`
+- 用户列表：`GET /users/`
+- 删除用户：`DELETE /users/1`
+- 点赞：`PUT /users/1/like`
+- 取消点赞：`DELETE /users/1/like`
+
+但是这样很多 API 的语义其实并不明确，举几个反例：
+
+- 对用户资源的创建在很多场景下等同于注册，这时比起 `POST /users/` 用 `POST /signup` 或是 `POST /register` 会更好一些。
+- 如果修改、删除的资源是确定的，那就不需要加入主键了，例如一个用户只能修改它自己的资料，那么 `PUT /users/1` 这种 API 定义就是累赘。
+- 查询接口尽量起一些更有意义的别名，比如 `/following` 和 `/followers` 要比 `/users?type=following/followers` 要好很多。
+
+对于基础的创建、更新、删除接口，我们固定会返回 Model 当前状态的完整数据。这样在大部分场景下都可以减少客户端、前端的一次额外请求刷新或是自己编写替换逻辑。
 
 
 
