@@ -50,10 +50,16 @@
 
 ### npm 换源
 
-使用淘宝源
+~~使用淘宝源~~
 
-1. `npm config set registry https://registry.npm.taobao.org`
-1. [cnpm](https://npm.taobao.org/)（使用 create-react-app 时不会走 cnpm，所以更推荐第一个方法）
+1. ~~`npm config set registry https://registry.npm.taobao.org`~~
+1. ~~[cnpm](https://npm.taobao.org/)（使用 create-react-app 时不会走 cnpm，所以更推荐第一个方法）~~
+
+淘宝源，属于玄学，还是用官方源保平安吧。宁可慢点。可以在命令行中使用 `export https_proxy` 通过代理来加速。
+
+```shell
+npm config set registry "http://registry.npmjs.org/"
+```
 
 ## 开发环境
 
