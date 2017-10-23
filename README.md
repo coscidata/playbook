@@ -20,6 +20,9 @@
     - [Flask 实践](#flask-实践)
         - [Model 定义](#model-定义)
         - [API 定义](#api-定义)
+    - [MySQL 实践](#mysql-实践)
+        - [使用 utf8mb4](#使用-utf8mb4)
+
 <!-- /TOC -->
 
 ## 技术栈
@@ -152,13 +155,13 @@ Container 主要负责获取数据、以及和服务端的交互，然后通过 
 
 这样的好处是能够保证 Presentational 组件拥有良好的复用性，以及它的数据结构是清晰地，大部分的 Presentational 组件都可以写成纯函数的形式：
 
-```
+```javascript
 // 没错，每个介绍的文章都要以 CommentList 举例
 const CommentList = props => {
   const { comments, handleDelete } = props;
   return (
-    <ul> 
-      {comments.map(<Comment onDelete={handleDelete} />)} 
+    <ul>
+      {comments.map(<Comment onDelete={handleDelete} />)}
     </ul>
   );
 };
@@ -195,7 +198,7 @@ const CommentList = props => {
 
 对于创建和修改，我们更倾向于使用声明式的字段权限控制以替代在 API 里写重复度非常高的校验代码，例如：
 
-```
+```python
 class User(BaseModelMixin):
     __tablename__ = 'user'
 
@@ -241,5 +244,27 @@ class User(BaseModelMixin):
 
 对于基础的创建、更新、删除接口，我们固定会返回 Model 当前状态的完整数据。这样在大部分场景下都可以减少客户端、前端的一次额外请求刷新或是自己编写替换逻辑。
 
+### MySQL 实践
 
+#### 使用 utf8mb4
 
+编辑 `/etc/my.cnf` 添加配置
+
+```cnf
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+
+[mysqld]
+character-set-client-handshake = FALSE
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+```
+
+使用下面命令检查编码是否正确
+
+```mysql
+SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIKE 'collation%';
+```
